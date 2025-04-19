@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Video Gallery</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f6f8;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #2c3e50;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      padding: 16px;
+      background: #3498db;
+      color: white;
+      text-align: center;
+    }
+
+    .card-video {
+      width: 100%;
+      height: auto;
+      background: #000;
+    }
+
+    .card-description {
+      padding: 12px 16px 16px 16px;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    video {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Available Videos</h1>
+  <div class="video-grid" id="videoGrid"></div>
+
+  <script>
+    async function loadVideos() {
+      try {
+        const response = await fetch("http://localhost:8081/movie-info/list");
+        const videos = await response.json();
+        const grid = document.getElementById("videoGrid");
+
+        videos.forEach(video => {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          const title = document.createElement("div");
+          title.className = "card-title";
+          title.textContent = video.name;
+
+          const videoEl = document.createElement("video");
+          videoEl.className = "card-video";
+          videoEl.controls = true;
+          videoEl.preload = "metadata";
+          videoEl.poster = `http://localhost:8081/stream/with-id/${video.id}#t=2`;
+
+          const source = document.createElement("source");
+          source.src = `http://localhost:8081/stream/with-id/${video.id}`;
+          source.type = "video/mp4";
+
+          videoEl.appendChild(source);
+
+          const description = document.createElement("div");
+          description.className = "card-description";
+          description.textContent = video.description;
+
+          card.appendChild(title);
+          card.appendChild(videoEl);
+          card.appendChild(description);
+          grid.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Error loading videos:", err);
+      }
+    }
+
+    loadVideos();
+  </script>
+</body>
+</html>
